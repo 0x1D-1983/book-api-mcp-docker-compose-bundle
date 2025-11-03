@@ -1,0 +1,57 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb-ha:pg17
+    hostname: timescaledb
+    container_name: timescaledb
+    environment:
+      - POSTGRES_DB=propertydb
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d propertydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    hostname: pgadmin
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - timescaledb
+
+  bookapi:
+    build:
+      context: ../BookApi
+      dockerfile: Dockerfile
+    container_name: bookapi
+    hostname: bookapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=timescaledb;Port=5432;Database=bookapi;Username=admin;Password=
+    depends_on:
+      - timescaledb
+
+  bookapi-mcp-server:
+    build:
+      context: ../book-api-mcp-server-dotnet
+      dockerfile: Dockerfile
+    container_name: bookapi-mcp-server
+    hostname: bookapi-mcp-server
+    environment:
+      - BookApi__BaseUrl=http://bookapi:8080
+    depends_on:
+      - bookapi
+
+volumes:
+  postgres-data:
+  pgadmin_data:
