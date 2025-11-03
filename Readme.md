@@ -2,6 +2,11 @@
 
 This bundle provides a complete Docker Compose setup for running the Book API and its MCP (Model Context Protocol) server, along with all required infrastructure.
 
+## Repositories
+
+- **Book API MCP Server**: [https://github.com/0x1D-1983/book-api-mcp-server-dotnet](https://github.com/0x1D-1983/book-api-mcp-server-dotnet/tree/main)
+- **Book API**: [https://github.com/0x1D-1983/book-api](https://github.com/0x1D-1983/book-api)
+
 ## Overview
 
 The `docker-compose.yml` file orchestrates four services that work together to provide a complete Book API ecosystem:

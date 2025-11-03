@@ -1,18 +1,18 @@
 {
-    "preferences": {
-      "quickEntryShortcut": "off"
-    },
-    "mcpServers": {
-      "book-api-mcp-server-dotnet": {
-        "command": "docker",
-        "args": [
-          "run",
-          "--rm",
-          "-i",
-          "--network", "postgres_default",
-          "-e", "BookApi__BaseUrl=http://bookapi:8080",
-          "postgres-bookapi-mcp-server:latest"
-        ]
-      }
+  "preferences": {
+    "quickEntryShortcut": "off"
+  },
+  "mcpServers": {
+    "book-api-mcp-server-dotnet": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--network", "book-api-mcp-bundle_default",
+        "-e", "BookApi__BaseUrl=http://bookapi:8080",
+        "book-api-mcp-bundle-bookapi-mcp-server:latest"
+      ]
     }
   }
+}
