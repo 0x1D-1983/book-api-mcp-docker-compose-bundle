@@ -2,9 +2,9 @@
 -- This script creates the database and table structure for the BookApi application
 
 -- Create the database (run this first in pgAdmin)
-CREATE DATABASE bookapi;
+CREATE DATABASE booksdb;
 
--- Connect to the bookapi database, then run the following:
+-- Connect to the booksdb database, then run the following:
 
 -- Create the books table
 CREATE TABLE IF NOT EXISTS books (
