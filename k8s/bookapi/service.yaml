@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookapi
+  labels:
+    app: bookapi
+spec:
+  type: ClusterIP
+  selector:
+    app: bookapi
+  ports:
+    - port: 5288
+      targetPort: 5288
+      protocol: TCP
+

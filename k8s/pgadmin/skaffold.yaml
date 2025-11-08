@@ -1,0 +1,12 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: pgadmin
+manifests:
+  rawYaml:
+    - configmap.yaml
+    - secret.yaml
+    - storage.yaml
+    - service.yaml
+    - deployment.yaml
+

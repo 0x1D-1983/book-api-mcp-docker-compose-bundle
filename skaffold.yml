@@ -1,0 +1,9 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: book-api-mcp-bundle
+requires:
+- path: ./k8s/timescaledb
+- path: ./k8s/pgadmin
+- path: ./k8s/bookapi
+- path: ./k8s/bookapi-mcp-server

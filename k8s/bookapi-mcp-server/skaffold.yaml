@@ -1,0 +1,9 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: book-api-mcp-server
+manifests:
+  rawYaml:
+    - configmap.yaml
+    - service.yaml
+    - deployment.yaml

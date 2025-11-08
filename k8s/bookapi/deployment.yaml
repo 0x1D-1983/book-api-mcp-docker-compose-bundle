@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookapi
+  labels:
+    app: bookapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookapi
+  template:
+    metadata:
+      labels:
+        app: bookapi
+    spec:
+      containers:
+        - name: bookapi
+          image: 0x1d1983/book-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5288
+          envFrom:
+            - configMapRef:
+                name: bookapi-config
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5288
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5288
+            initialDelaySeconds: 30
+            periodSeconds: 30
+

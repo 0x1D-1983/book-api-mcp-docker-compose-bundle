@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: timescaledb-config
+data:
+  POSTGRES_DB: booksdb
+  POSTGRES_USER: admin
+

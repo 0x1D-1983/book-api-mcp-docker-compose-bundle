@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bookapi-mcp-server-config
+data:
+  BookApi__BaseUrl: http://bookapi:5288
+

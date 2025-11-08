@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookapi-mcp-server
+  labels:
+    app: bookapi-mcp-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookapi-mcp-server
+  template:
+    metadata:
+      labels:
+        app: bookapi-mcp-server
+    spec:
+      containers:
+        - name: bookapi-mcp-server
+          image: 0x1d1983/book-api-mcp-server:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: bookapi-mcp-server-config
+          ports:
+            - containerPort: 8081
+
