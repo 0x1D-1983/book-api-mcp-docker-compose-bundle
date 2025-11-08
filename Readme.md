@@ -140,3 +140,104 @@ All services run on the default Docker Compose network, allowing them to communi
 - The BookApi service connects to a database named `bookapi`, but TimescaleDB initializes with `propertydb`. You'll need to create the `bookapi` database manually or via the SQL script.
 - The pgAdmin interface is accessible on port `5050` on your host machine.
 
+
+## Running with Skaffold and Minikube (Kubernetes)
+
+If you'd like to run the services on a local Kubernetes environment rather than Docker Compose, you can use [Skaffold](https://skaffold.dev/) with [Minikube](https://minikube.sigs.k8s.io/).
+
+### 1. Create a Self-Signed TLS Certificate and Private Key
+
+Before running Envoy in Kubernetes, generate TLS certs for service encryption:
+
+```bash
+openssl req -x509 -newkey rsa:4096 -nodes -sha256 -days 365 \
+    -keyout privkey.pem -out cert.pem -extensions san \
+    -config \
+    <(echo "[req]";
+      echo distinguished_name=req;
+      echo "[san]";
+      echo subjectAltName=DNS:bookapi-mcp-server.default.svc.cluster.local
+     ) \
+    -subj '/CN=bookapi-mcp-server.default.svc.cluster.local'
+```
+
+This produces `cert.pem` and `privkey.pem` for use by Envoy to terminate TLS.
+
+### 2. Create a Kubernetes Secret for Envoy
+
+Store these files as a Kubernetes TLS secret for Envoy to mount:
+
+```bash
+kubectl create secret tls envoy-certs \
+    --key privkey.pem --cert cert.pem \
+    --dry-run=client --output yaml | kubectl apply --filename -
+```
+
+### 3. Start Minikube (if not already running)
+
+```bash
+minikube start
+```
+
+Check status with:
+
+```bash
+minikube status
+```
+
+To use Minikube's internal Docker registry for local builds:
+
+```bash
+eval $(minikube docker-env)
+```
+
+### 4. Build and Deploy All Services with Skaffold
+
+From the project root:
+
+```bash
+skaffold run --tail
+```
+
+This will build and deploy all services (TimescaleDB, BookApi, MCP Server, Envoy, etc) into your Minikube cluster.
+
+### 5. Expose Envoy via LoadBalancer and Tunnel
+
+Envoy is exposed as a Kubernetes LoadBalancer service. To access it from your local machine, run:
+
+```bash
+minikube tunnel
+```
+
+This command keeps running and exposes `LoadBalancer` services at a local IP.
+
+After tunnel is running, find the Envoy service’s external IP and port:
+
+```bash
+kubectl get svc
+```
+
+Look for the `envoy` service—typically exposed on port 443.
+
+### 6. Stopping Minikube & Cleaning Up
+
+When done:
+
+```bash
+minikube stop
+```
+...to stop the cluster. To delete all cluster resources:
+
+```bash
+minikube delete
+```
+
+### Additional Notes
+
+- The database is not persisted in Minikube unless you use persistent volumes in your Kubernetes manifests.
+- If you're testing locally, you may need to port-forward specific services (like TimescaleDB or pgAdmin) using `kubectl port-forward` for local debugging.
+- Make sure any environment variables for database connection or API URLs reflect the Kubernetes service names (e.g., `bookapi`, `timescaledb`).
+
+See the `k8s/` directory for configs and customize as needed for your local environment.
+
+

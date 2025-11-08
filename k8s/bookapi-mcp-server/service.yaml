@@ -9,7 +9,7 @@ spec:
   selector:
     app: bookapi-mcp-server
   ports:
-    - port: 8081
-      targetPort: 8081
+    - port: 5289
+      targetPort: 5289
       protocol: TCP
 

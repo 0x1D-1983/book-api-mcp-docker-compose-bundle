@@ -1,0 +1,14 @@
+openssl req -x509 -newkey rsa:4096 -nodes -sha256 -days 365 \
+    -keyout privkey.pem -out cert.pem -extensions san \
+    -config \
+    <(echo "[req]";
+      echo distinguished_name=req;
+      echo "[san]";
+      echo subjectAltName=DNS:grpc.example.com
+     ) \
+    -subj '/CN=bookapi-mcp-server.default.svc.cluster.local'cd 
+
+
+kubectl create secret tls envoy-certs \
+    --key privkey.pem --cert cert.pem \
+    --dry-run=client --output yaml | kubectl apply --filename -

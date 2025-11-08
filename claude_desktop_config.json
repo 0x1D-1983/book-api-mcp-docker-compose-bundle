@@ -13,6 +13,12 @@
         "-e", "BookApi__BaseUrl=http://bookapi:8080",
         "book-api-mcp-bundle-bookapi-mcp-server:latest"
       ]
+    },
+    "book-api-mcp-server-minikube": {
+      "url": "https://bookapi-mcp-server.default.svc.cluster.local/",
+      "transport": {
+        "type": "http"
+      }
     }
   }
 }

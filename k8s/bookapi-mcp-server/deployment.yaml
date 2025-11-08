@@ -18,9 +18,26 @@ spec:
         - name: bookapi-mcp-server
           image: 0x1d1983/book-api-mcp-server:latest
           imagePullPolicy: Always
+          ports:
+            - containerPort: 5289
           envFrom:
             - configMapRef:
                 name: bookapi-mcp-server-config
-          ports:
-            - containerPort: 8081
-
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5289
+              httpHeaders:
+                - name: Mcp-Session-Id
+                  value: readiness-probe
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5289
+              httpHeaders:
+                - name: Mcp-Session-Id
+                  value: liveness-probe
+            initialDelaySeconds: 30
+            periodSeconds: 30
