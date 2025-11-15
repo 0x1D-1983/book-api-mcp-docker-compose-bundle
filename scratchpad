@@ -1,0 +1,75 @@
+PROJECT_NAME=$(gcloud config get-value project)
+REGION=us-central1
+ZONE=a
+
+# Create GKE cluster
+gcloud config set project $PROJECT_NAME
+
+gcloud config set compute/zone $REGION-$ZONE
+
+gcloud config set compute/region $REGION
+
+gcloud services enable container.googleapis.com compute.googleapis.com
+
+gcloud compute networks create $PROJECT_NAME-network \
+  --subnet-mode=custom
+
+gcloud compute networks subnets create $PROJECT_NAME-subnet \
+  --network=$PROJECT_NAME-network \
+  --range=10.0.0.0/24
+
+gcloud container clusters create $PROJECT_NAME-cluster \
+  --zone "$REGION-$ZONE" \
+  --machine-type "n1-standard-1" \
+  --disk-size "15" \
+  --num-nodes "1" \
+  --enable-ip-alias \
+  --network "projects/$PROJECT_NAME/global/networks/$PROJECT_NAME-network" \
+  --subnetwork "projects/$PROJECT_NAME/regions/$REGION/subnetworks/$PROJECT_NAME-subnet" \
+  --node-locations "$REGION-$ZONE"
+
+
+gcloud artifacts repositories create $PROJECT_NAME-images \
+    --repository-format docker \
+    --location $REGION
+
+PROJECT_NUMBER=$(gcloud projects describe $PROJECT_NAME --format 'value(projectNumber)')
+
+gcloud artifacts repositories add-iam-policy-binding $PROJECT_NAME-images \
+    --location $REGION \
+    --member serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com \
+    --role roles/artifactregistry.reader
+
+gcloud auth configure-docker $REGION-docker.pkg.dev
+
+
+docker build --platform=linux/amd64 -t $REGION-docker.pkg.dev/$PROJECT_NAME/$PROJECT_NAME-images/book-api .
+docker push $REGION-docker.pkg.dev/$PROJECT_NAME/$PROJECT_NAME-images/book-api
+
+docker build --platform=linux/amd64 -t $REGION-docker.pkg.dev/$PROJECT_NAME/$PROJECT_NAME-images/book-api-mcp-server .
+docker push $REGION-docker.pkg.dev/$PROJECT_NAME/$PROJECT_NAME-images/book-api-mcp-server
+
+
+gcloud auth login
+gcloud container clusters get-credentials $PROJECT_NAME-cluster --zone $REGION-$ZONE --project $PROJECT_NAME
+kubectl config use-context node/gke-book-api-mcp-server--default-pool-a3ed84fe-qjzw
+
+skaffold run 
+#for all services
+
+
+
+gcloud sql instances create $PROJECT_NAME-timescaledb \
+  --database-version=POSTGRES_15 \
+  --tier=db-f1-micro \
+  --region=$REGION \
+  --root-password=3KKUjV0ThmuN7LRu
+
+gcloud sql users create bookapi-admin --instance=$PROJECT_NAME-timescaledb --password=XKlbgPXPkZKrgvT3
+
+gcloud sql databases create booksdb --instance=$PROJECT_NAME-timescaledb
+
+
+# cleanup
+gcloud container clusters delete $PROJECT_NAME-cluster
+gcloud sql instances delete $PROJECT_NAME-timescaledb

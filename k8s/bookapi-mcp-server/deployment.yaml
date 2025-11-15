@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: bookapi-mcp-server
-          image: 0x1d1983/book-api-mcp-server:latest
+          image: us-central1-docker.pkg.dev/book-api-mcp-server/book-api-mcp-server-images/book-api:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5289

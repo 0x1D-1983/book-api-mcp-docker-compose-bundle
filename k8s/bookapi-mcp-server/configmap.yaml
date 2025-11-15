@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: bookapi-mcp-server-config
 data:
-  BookApi__BaseUrl: http://bookapi:5288
+  BookApi__BaseUrl: ${BOOK_API_URL}
 
