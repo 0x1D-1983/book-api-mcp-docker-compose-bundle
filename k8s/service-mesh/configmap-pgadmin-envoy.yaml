@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: bookapi-envoy-config
+  name: pgadmin-envoy-config
   namespace: default
 data:
   envoy.yaml: |
@@ -14,6 +14,7 @@ data:
           port_value: 9901
     static_resources:
       listeners:
+        # Inbound listener - receives traffic from other services
         - name: listener_inbound
           address:
             socket_address:
@@ -55,8 +56,8 @@ data:
                       trusted_ca:
                         filename: /etc/envoy/certs/ca.crt
                       match_subject_alt_names:
-                        - exact: bookapi-mcp-server
-                        - exact: bookapi-mcp-server.default.svc.cluster.local
+                        - exact: envoy
+                        - exact: envoy.default.svc.cluster.local
         # Outbound HTTP listener
         - name: listener_outbound_http
           address:
@@ -71,9 +72,9 @@ data:
                     "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                     stat_prefix: outbound_http
                     route_config:
-                      name: local_route
+                      name: outbound_route
                       virtual_hosts:
-                        - name: local_service
+                        - name: passthrough
                           domains: ["*"]
                           routes:
                             - match:
@@ -99,6 +100,7 @@ data:
                     stat_prefix: outbound_tcp
                     cluster: timescaledb
       clusters:
+        # Local application cluster
         - name: local_app
           connect_timeout: 0.25s
           type: STATIC
@@ -111,7 +113,7 @@ data:
                       address:
                         socket_address:
                           address: 127.0.0.1
-                          port_value: 5288
+                          port_value: 80
         # Cluster for timescaledb with mTLS (TCP proxy)
         - name: timescaledb
           connect_timeout: 0.5s
@@ -143,6 +145,7 @@ data:
                   match_subject_alt_names:
                     - exact: timescaledb
                     - exact: timescaledb.default.svc.cluster.local
+        # Passthrough cluster for outbound HTTP traffic
         - name: passthrough
           connect_timeout: 0.25s
           type: ORIGINAL_DST
@@ -160,13 +163,4 @@ data:
                 validation_context:
                   trusted_ca:
                     filename: /etc/envoy/certs/ca.crt
-                  match_subject_alt_names:
-                    - exact: bookapi
-                    - exact: bookapi.default.svc.cluster.local
-                    - exact: bookapi-mcp-server
-                    - exact: bookapi-mcp-server.default.svc.cluster.local
-                    - exact: pgadmin
-                    - exact: pgadmin.default.svc.cluster.local
-                    - exact: timescaledb
-                    - exact: timescaledb.default.svc.cluster.local
 

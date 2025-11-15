@@ -10,14 +10,22 @@ resources:
   # Envoy configurations
   - configmap-bookapi-envoy.yaml
   - configmap-bookapi-mcp-server-envoy.yaml
+  - configmap-pgadmin-envoy.yaml
+  - configmap-timescaledb-envoy.yaml
+  - envoy-edge-configmap.yaml
   
   # Deployments with Envoy sidecars
   - bookapi-deployment.yaml
   - bookapi-mcp-server-deployment.yaml
+  - pgadmin-deployment.yaml
+  - timescaledb-deployment.yaml
+  - envoy-edge-deployment.yaml
   
   # Services
   - bookapi-service.yaml
   - bookapi-mcp-server-service.yaml
+  - pgadmin-service.yaml
+  - timescaledb-service.yaml
 
 # Note: commonLabels is not used to avoid modifying immutable selectors
 # Labels can be added to pod templates if needed via patches

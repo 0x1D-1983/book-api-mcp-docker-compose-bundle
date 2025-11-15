@@ -1,42 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bookapi
+  name: pgadmin
   labels:
-    app: bookapi
+    app: pgadmin
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: bookapi
+      app: pgadmin
   template:
     metadata:
       labels:
-        app: bookapi
+        app: pgadmin
     spec:
       containers:
         # Main application container
-        - name: bookapi
-          image: 0x1d1983/book-api:latest
-          imagePullPolicy: Always
+        - name: pgadmin
+          image: dpage/pgadmin4
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 5288
+            - containerPort: 80
               name: http
           envFrom:
             - configMapRef:
-                name: bookapi-config
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 5288
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 5288
-            initialDelaySeconds: 30
-            periodSeconds: 30
+                name: pgadmin-config
+            - secretRef:
+                name: pgadmin-secret
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/pgadmin
         # Envoy sidecar container
         - name: envoy
           image: envoyproxy/envoy:v1.31-latest
@@ -74,10 +67,13 @@ spec:
               cpu: 500m
               memory: 256Mi
       volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pgadmin-data
         - name: envoy-config
           configMap:
-            name: bookapi-envoy-config
+            name: pgadmin-envoy-config
         - name: envoy-certs
           secret:
-            secretName: bookapi-mtls-cert
+            secretName: pgadmin-mtls-cert
 

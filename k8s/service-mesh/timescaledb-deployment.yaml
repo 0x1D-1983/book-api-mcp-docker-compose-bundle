@@ -1,43 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bookapi
+  name: timescaledb
   labels:
-    app: bookapi
+    app: timescaledb
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: bookapi
+      app: timescaledb
   template:
     metadata:
       labels:
-        app: bookapi
+        app: timescaledb
     spec:
       containers:
-        # Main application container
-        - name: bookapi
-          image: 0x1d1983/book-api:latest
-          imagePullPolicy: Always
+        # Main database container
+        - name: timescaledb
+          image: timescale/timescaledb-ha:pg17
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 5288
-              name: http
+            - containerPort: 5432
+              name: postgres
           envFrom:
             - configMapRef:
-                name: bookapi-config
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 5288
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 5288
-            initialDelaySeconds: 30
-            periodSeconds: 30
-        # Envoy sidecar container
+                name: timescaledb-config
+            - secretRef:
+                name: timescaledb-secret
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+        # Envoy sidecar container for TCP proxy with mTLS
         - name: envoy
           image: envoyproxy/envoy:v1.31-latest
           args:
@@ -49,12 +42,9 @@ spec:
             - upstream:info,connection:info
           ports:
             - containerPort: 15001
-              name: http-inbound
+              name: tcp-inbound
               protocol: TCP
             - containerPort: 15006
-              name: http-outbound
-              protocol: TCP
-            - containerPort: 15007
               name: tcp-outbound
               protocol: TCP
             - containerPort: 9901
@@ -74,10 +64,13 @@ spec:
               cpu: 500m
               memory: 256Mi
       volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: timescaledb-data
         - name: envoy-config
           configMap:
-            name: bookapi-envoy-config
+            name: timescaledb-envoy-config
         - name: envoy-certs
           secret:
-            secretName: bookapi-mtls-cert
+            secretName: timescaledb-mtls-cert
 
