@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookapi
+  labels:
+    app: bookapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookapi
+  template:
+    metadata:
+      labels:
+        app: bookapi
+    spec:
+      containers:
+        # Main application container
+        - name: bookapi
+          image: us-central1-docker.pkg.dev/book-api-mcp-server/book-api-mcp-server-images/book-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5288
+              name: http
+          envFrom:
+            - configMapRef:
+                name: bookapi-config
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5288
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5288
+            initialDelaySeconds: 30
+            periodSeconds: 30
+        # Envoy sidecar container
+        - name: envoy
+          image: envoyproxy/envoy:v1.31-latest
+          args:
+            - -c
+            - /etc/envoy/envoy.yaml
+            - -l
+            - info
+            - --component-log-level
+            - upstream:info,connection:info
+          ports:
+            - containerPort: 15001
+              name: http-inbound
+              protocol: TCP
+            - containerPort: 15006
+              name: http-outbound
+              protocol: TCP
+            - containerPort: 9901
+              name: admin
+              protocol: TCP
+          volumeMounts:
+            - name: envoy-config
+              mountPath: /etc/envoy
+            - name: envoy-certs
+              mountPath: /etc/envoy/certs
+              readOnly: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: envoy-config
+          configMap:
+            name: bookapi-envoy-config
+        - name: envoy-certs
+          secret:
+            secretName: bookapi-mtls-cert
+

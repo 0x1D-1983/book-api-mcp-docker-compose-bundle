@@ -1,0 +1,45 @@
+---
+# Certificate Authority for Service Mesh mTLS
+apiVersion: v1
+kind: Secret
+metadata:
+  name: service-mesh-ca
+  namespace: default
+type: Opaque
+data:
+  # These are placeholder base64 encoded values
+  # In production, generate real certificates using:
+  # openssl genrsa -out ca.key 4096
+  # openssl req -new -x509 -days 365 -key ca.key -out ca.crt -subj "/CN=service-mesh-ca"
+  ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLg==
+  ca.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCi4uLg==
+---
+# Certificate for bookapi service
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bookapi-mtls-cert
+  namespace: default
+type: Opaque
+data:
+  # Generate with: 
+  # openssl genrsa -out bookapi.key 2048
+  # openssl req -new -key bookapi.key -out bookapi.csr -subj "/CN=bookapi"
+  # openssl x509 -req -in bookapi.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out bookapi.crt -days 365
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLg==
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCi4uLg==
+  ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLg==
+---
+# Certificate for bookapi-mcp-server service
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bookapi-mcp-server-mtls-cert
+  namespace: default
+type: Opaque
+data:
+  # Generate with similar process for bookapi-mcp-server
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLg==
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCi4uLg==
+  ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLg==
+

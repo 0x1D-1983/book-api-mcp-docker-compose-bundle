@@ -1,0 +1,16 @@
+apiVersion: skaffold/v4beta7
+kind: Config
+metadata:
+  name: service-mesh
+build:
+  local:
+    push: false
+deploy:
+  kustomize:
+    paths:
+      - .
+manifests:
+  kustomize:
+    paths:
+      - .
+

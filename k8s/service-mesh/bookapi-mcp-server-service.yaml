@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookapi-mcp-server
+  labels:
+    app: bookapi-mcp-server
+spec:
+  type: ClusterIP
+  selector:
+    app: bookapi-mcp-server
+  ports:
+    # Service mesh port - routes to Envoy sidecar
+    - port: 15001
+      targetPort: 15001
+      protocol: TCP
+      name: http-mtls
+    # Original application port (for direct access if needed)
+    - port: 5289
+      targetPort: 5289
+      protocol: TCP
+      name: http
+

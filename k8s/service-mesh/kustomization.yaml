@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+
+resources:
+  # Certificate management
+  - cert-manager.yaml
+  
+  # Envoy configurations
+  - configmap-bookapi-envoy.yaml
+  - configmap-bookapi-mcp-server-envoy.yaml
+  
+  # Deployments with Envoy sidecars
+  - bookapi-deployment.yaml
+  - bookapi-mcp-server-deployment.yaml
+  
+  # Services
+  - bookapi-service.yaml
+  - bookapi-mcp-server-service.yaml
+
+# Note: commonLabels is not used to avoid modifying immutable selectors
+# Labels can be added to pod templates if needed via patches
+
