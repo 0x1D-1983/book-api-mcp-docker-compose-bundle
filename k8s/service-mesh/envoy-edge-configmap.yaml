@@ -42,6 +42,14 @@ data:
                   domains:
                   - "*"
                   routes:
+                  # Route pgAdmin requests
+                  - match:
+                      prefix: "/pgadmin"
+                    route:
+                      cluster: pgadmin
+                      prefix_rewrite: "/"
+                      timeout: 300s
+                  # Default route to bookapi-mcp-server
                   - match:
                       prefix: "/"
                     route:
@@ -73,6 +81,39 @@ data:
                   private_key:
                     filename: /etc/ssl/envoy/tls.key
       clusters:
+      # pgAdmin cluster
+      - name: pgadmin
+        connect_timeout: 0.5s
+        type: STRICT_DNS
+        dns_lookup_family: V4_ONLY
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: pgadmin
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: pgadmin.default.svc.cluster.local
+                    port_value: 15001
+        # Use mTLS when connecting to backend services
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              tls_certificates:
+                - certificate_chain:
+                    filename: /etc/ssl/envoy/tls.crt
+                  private_key:
+                    filename: /etc/ssl/envoy/tls.key
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/envoy/ca.crt
+                match_subject_alt_names:
+                  - exact: pgadmin
+                  - exact: pgadmin.default.svc.cluster.local
+      # bookapi-mcp-server cluster
       - name: bookapi-mcp-server
         connect_timeout: 0.5s
         type: STRICT_DNS
