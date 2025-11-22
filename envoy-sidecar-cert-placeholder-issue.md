@@ -27,9 +27,9 @@ ls -la certs/ 2>&1 || echo "certs directory does not exist"
 ./generate-certs.sh 2>&1 | tail -20
 
 
-cd /Users/oxid/code/book-api-mcp-bundle/k8s/service-mesh && kubectl delete secret service-mesh-ca bookapi-mtls-cert bookapi-mcp-server-mtls-cert
-cd /Users/oxid/code/book-api-mcp-bundle/k8s/service-mesh && kubectl create secret generic bookapi-mtls-cert --from-file=tls.crt=./certs/bookapi.crt --from-file=tls.key=./certs/bookapi.key --from-file=ca.crt=./certs/ca.crt
-cd /Users/oxid/code/book-api-mcp-bundle/k8s/service-mesh && kubectl create secret generic bookapi-mcp-server-mtls-cert --from-file=tls.crt=./certs/bookapi-mcp-server.crt --from-file=tls.key=./certs/bookapi-mcp-server.key --from-file=ca.crt=./certs/ca.crt
+kubectl delete secret service-mesh-ca bookapi-mtls-cert bookapi-mcp-server-mtls-cert
+kubectl create secret generic bookapi-mtls-cert --from-file=tls.crt=./certs/bookapi.crt --from-file=tls.key=./certs/bookapi.key --from-file=ca.crt=./certs/ca.crt
+kubectl create secret generic bookapi-mcp-server-mtls-cert --from-file=tls.crt=./certs/bookapi-mcp-server.crt --from-file=tls.key=./certs/bookapi-mcp-server.key --from-file=ca.crt=./certs/ca.crt
 
 sleep 5 && kubectl get pods -l app=bookapi
 kubectl get pods -l app=bookapi-mcp-server
@@ -38,7 +38,7 @@ kubectl delete pod -l app=bookapi && kubectl delete pod -l app=bookapi-mcp-serve
 kubectl logs bookapi-794cfb9bcd-ttmmk -c envoy --tail=10
 kubectl logs bookapi-mcp-server-658c586d84-xql2v -c envoy --tail=10
 
-sleep 5 && kubectl get pods
+kubectl get pods
 ```
 
 

@@ -1,5 +1,16 @@
+# DEPRECATED: This file is no longer used.
+# Secrets are now generated from certificate files using Kustomize's secretGenerator
+# in kustomization.yaml. This file is kept for reference only.
+#
+# To use certificate files directly, see kustomization.yaml which uses:
+#   secretGenerator:
+#     - name: service-mesh-ca
+#       files:
+#         - ca.crt=certs/ca.crt
+#         - ca.key=certs/ca.key
+#
 ---
-# Certificate Authority for Service Mesh mTLS
+# Certificate Authority for Service Mesh mTLS (DEPRECATED - not used)
 apiVersion: v1
 kind: Secret
 metadata:
@@ -14,7 +25,7 @@ data:
   ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLg==
   ca.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCi4uLg==
 ---
-# Certificate for bookapi service
+# Certificate for bookapi service (DEPRECATED - not used)
 apiVersion: v1
 kind: Secret
 metadata:
@@ -30,7 +41,7 @@ data:
   tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCi4uLg==
   ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLg==
 ---
-# Certificate for bookapi-mcp-server service
+# Certificate for bookapi-mcp-server service (DEPRECATED - not used)
 apiVersion: v1
 kind: Secret
 metadata:

@@ -59,8 +59,28 @@ kubectl create secret generic bookapi-mcp-server-mtls-cert \
   --from-file=tls.key="$CERT_DIR/bookapi-mcp-server.key" \
   --from-file=ca.crt="$CERT_DIR/ca.crt"
 
+# pgAdmin secret (needed for edge Envoy to connect)
+if [ -f "$CERT_DIR/pgadmin.crt" ] && [ -f "$CERT_DIR/pgadmin.key" ]; then
+  echo "Updating pgadmin-mtls-cert..."
+  kubectl delete secret pgadmin-mtls-cert 2>/dev/null || echo "  pgadmin-mtls-cert not found (will create new)"
+  kubectl create secret generic pgadmin-mtls-cert \
+    --from-file=tls.crt="$CERT_DIR/pgadmin.crt" \
+    --from-file=tls.key="$CERT_DIR/pgadmin.key" \
+    --from-file=ca.crt="$CERT_DIR/ca.crt"
+fi
+
+# Edge Envoy secret (needed for edge Envoy to connect to backend services)
+if [ -f "$CERT_DIR/envoy.crt" ] && [ -f "$CERT_DIR/envoy.key" ]; then
+  echo "Updating envoy-mtls-cert..."
+  kubectl delete secret envoy-mtls-cert 2>/dev/null || echo "  envoy-mtls-cert not found (will create new)"
+  kubectl create secret generic envoy-mtls-cert \
+    --from-file=tls.crt="$CERT_DIR/envoy.crt" \
+    --from-file=tls.key="$CERT_DIR/envoy.key" \
+    --from-file=ca.crt="$CERT_DIR/ca.crt"
+fi
+
 echo ""
-echo "✓ Secrets created"
+echo "✓ Secrets created/updated"
 echo ""
 
 # Restart pods to pick up new certificates

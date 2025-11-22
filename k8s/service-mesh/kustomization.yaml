@@ -4,9 +4,6 @@ kind: Kustomization
 namespace: default
 
 resources:
-  # Certificate management
-  - cert-manager.yaml
-  
   # Envoy configurations
   - configmap-bookapi-envoy.yaml
   - configmap-bookapi-mcp-server-envoy.yaml
@@ -26,6 +23,61 @@ resources:
   - bookapi-mcp-server-service.yaml
   - pgadmin-service.yaml
   - timescaledb-service.yaml
+  - envoy-service.yaml
+
+# Generate secrets from certificate files
+# Note: disableNameSuffixHash prevents Kustomize from adding hash suffixes to secret names
+# This ensures deployments can reference secrets by their exact names
+generatorOptions:
+  disableNameSuffixHash: true
+
+secretGenerator:
+  # CA Certificate
+  - name: service-mesh-ca
+    files:
+      - ca.crt=certs/ca.crt
+      - ca.key=certs/ca.key
+    type: Opaque
+  
+  # BookAPI mTLS certificate
+  - name: bookapi-mtls-cert
+    files:
+      - tls.crt=certs/bookapi.crt
+      - tls.key=certs/bookapi.key
+      - ca.crt=certs/ca.crt
+    type: Opaque
+  
+  # BookAPI MCP Server mTLS certificate
+  - name: bookapi-mcp-server-mtls-cert
+    files:
+      - tls.crt=certs/bookapi-mcp-server.crt
+      - tls.key=certs/bookapi-mcp-server.key
+      - ca.crt=certs/ca.crt
+    type: Opaque
+  
+  # pgAdmin mTLS certificate
+  - name: pgadmin-mtls-cert
+    files:
+      - tls.crt=certs/pgadmin.crt
+      - tls.key=certs/pgadmin.key
+      - ca.crt=certs/ca.crt
+    type: Opaque
+  
+  # TimescaleDB mTLS certificate
+  - name: timescaledb-mtls-cert
+    files:
+      - tls.crt=certs/timescaledb.crt
+      - tls.key=certs/timescaledb.key
+      - ca.crt=certs/ca.crt
+    type: Opaque
+  
+  # Edge Envoy mTLS certificate
+  - name: envoy-mtls-cert
+    files:
+      - tls.crt=certs/envoy.crt
+      - tls.key=certs/envoy.key
+      - ca.crt=certs/ca.crt
+    type: Opaque
 
 # Note: commonLabels is not used to avoid modifying immutable selectors
 # Labels can be added to pod templates if needed via patches
