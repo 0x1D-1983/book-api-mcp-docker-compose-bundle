@@ -2,19 +2,12 @@ cert.pem
 privkey.pem
 
 cert/
+certs/
 
-k8s/service-mesh/certs/bookapi-mcp-server.crt
-
-k8s/service-mesh/certs/bookapi-mcp-server.key
-
-k8s/service-mesh/certs/bookapi.crt
-
-k8s/service-mesh/certs/bookapi.key
-
-k8s/service-mesh/certs/ca.crt
-
-k8s/service-mesh/certs/ca.key
-
-k8s/service-mesh/certs/ca.srl
-
-k8s/service-mesh/certs/envoy.crt
+*.crt
+*.key
+*.srl
+*.pem
+*.csr
+*.req
+*.ext
