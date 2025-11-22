@@ -1,3 +1,11 @@
+# DEPRECATED: This file is no longer used.
+# The Envoy configuration has been moved to envoy-edge.yaml for better editor support.
+# Kustomize's configMapGenerator now creates this ConfigMap from envoy-edge.yaml
+# See kustomization.yaml for the configMapGenerator configuration.
+#
+# To edit the Envoy configuration, edit envoy-edge.yaml instead.
+#
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:

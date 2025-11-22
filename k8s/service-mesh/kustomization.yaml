@@ -9,7 +9,6 @@ resources:
   - configmap-bookapi-mcp-server-envoy.yaml
   - configmap-pgadmin-envoy.yaml
   - configmap-timescaledb-envoy.yaml
-  - envoy-edge-configmap.yaml
   
   # Deployments with Envoy sidecars
   - bookapi-deployment.yaml
@@ -30,6 +29,14 @@ resources:
 # This ensures deployments can reference secrets by their exact names
 generatorOptions:
   disableNameSuffixHash: true
+
+# Generate ConfigMap from envoy-edge.yaml file
+# This allows editing envoy-edge.yaml with proper syntax highlighting
+configMapGenerator:
+  - name: envoy-conf
+    files:
+      - envoy.yaml=envoy-edge.yaml
+    namespace: default
 
 secretGenerator:
   # CA Certificate
