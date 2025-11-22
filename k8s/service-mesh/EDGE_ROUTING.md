@@ -106,10 +106,7 @@ To add a new route, update `envoy-edge-configmap.yaml`:
            validation_context:
              trusted_ca:
                filename: /etc/ssl/envoy/ca.crt
-             match_subject_alt_names:
-               - exact: new-service
-               - exact: new-service.default.svc.cluster.local
-   ```
+```
 
 ## Troubleshooting
 

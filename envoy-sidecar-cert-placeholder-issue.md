@@ -63,5 +63,3 @@ bookapi-mcp-server: 2/2 Running (app + envoy sidecar)
 Envoy logs show "starting main dispatch loop" — configuration loaded successfully
 
 The service mesh with mTLS is operational. Services can communicate through the Envoy sidecars with mutual TLS encryption.
-
-Note: The warnings about deprecated fields (match_subject_alt_names) are informational and won't affect functionality. They can be addressed in a future Envoy version update.

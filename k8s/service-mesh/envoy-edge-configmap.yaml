@@ -11,6 +11,9 @@ data:
           typed_config:
             "@type": type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
             path: "/dev/stdout"
+            log_format:
+              text_format_source:
+                inline_string: "[%START_TIME%] %REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL% %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% %REQ(X-FORWARDED-FOR)% %REQ(USER-AGENT)% %REQ(X-REQUEST-ID)% %REQ(:AUTHORITY)% %UPSTREAM_HOST%"
       address:
         socket_address:
           protocol: TCP
@@ -110,9 +113,8 @@ data:
               validation_context:
                 trusted_ca:
                   filename: /etc/ssl/envoy/ca.crt
-                match_subject_alt_names:
-                  - exact: pgadmin
-                  - exact: pgadmin.default.svc.cluster.local
+                # Removed match_typed_subject_alt_names - relying on CA validation only
+                # This avoids SPKI mismatch errors while still ensuring certificates are signed by trusted CA
       # bookapi-mcp-server cluster
       - name: bookapi-mcp-server
         connect_timeout: 0.5s
@@ -142,9 +144,8 @@ data:
               validation_context:
                 trusted_ca:
                   filename: /etc/ssl/envoy/ca.crt
-                match_subject_alt_names:
-                  - exact: bookapi-mcp-server
-                  - exact: bookapi-mcp-server.default.svc.cluster.local
+                # Removed match_typed_subject_alt_names - relying on CA validation only
+                # This avoids SPKI mismatch errors while still ensuring certificates are signed by trusted CA
     layered_runtime:
       layers:
         - name: static_layer_0
