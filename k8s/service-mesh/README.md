@@ -61,6 +61,24 @@ kubectl create secret generic bookapi-mcp-server-mtls-cert \
   --from-file=tls.crt=./certs/bookapi-mcp-server.crt \
   --from-file=tls.key=./certs/bookapi-mcp-server.key \
   --from-file=ca.crt=./certs/ca.crt
+
+# pgAdmin Secret
+kubectl create secret generic pgadmin-mtls-cert \
+  --from-file=tls.crt=./certs/pgadmin.crt \
+  --from-file=tls.key=./certs/pgadmin.key \
+  --from-file=ca.crt=./certs/ca.crt
+
+# TimescaleDB Secret
+kubectl create secret generic timescaledb-mtls-cert \
+  --from-file=tls.crt=./certs/timescaledb.crt \
+  --from-file=tls.key=./certs/timescaledb.key \
+  --from-file=ca.crt=./certs/ca.crt
+
+# Edge Envoy Secret
+kubectl create secret generic envoy-mtls-cert \
+  --from-file=tls.crt=./certs/envoy.crt \
+  --from-file=tls.key=./certs/envoy.key \
+  --from-file=ca.crt=./certs/ca.crt
 ```
 
 ### 3. Apply Service Mesh Configuration

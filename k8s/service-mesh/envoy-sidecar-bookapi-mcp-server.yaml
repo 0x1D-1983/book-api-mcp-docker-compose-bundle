@@ -33,7 +33,7 @@ static_resources:
                 http_filters:
                   - name: envoy.filters.http.router
                     typed_config:
-                      "@type": type.googleapis.com/extensions.filters.http.router.v3.Router
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
           # mTLS configuration for inbound traffic
           transport_socket:
             name: envoy.transport_sockets.tls
