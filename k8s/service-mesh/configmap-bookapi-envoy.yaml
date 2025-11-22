@@ -1,3 +1,11 @@
+# DEPRECATED: This file is no longer used.
+# The Envoy configuration has been moved to bookapi-envoy.yaml for better editor support.
+# Kustomize's configMapGenerator now creates this ConfigMap from bookapi-envoy.yaml
+# See kustomization.yaml for the configMapGenerator configuration.
+#
+# To edit the Envoy configuration, edit bookapi-envoy.yaml instead.
+#
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:

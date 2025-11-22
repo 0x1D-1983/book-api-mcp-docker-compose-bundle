@@ -1,3 +1,11 @@
+# DEPRECATED: This file is no longer used.
+# The Envoy configuration has been moved to pgadmin-envoy.yaml for better editor support.
+# Kustomize's configMapGenerator now creates this ConfigMap from pgadmin-envoy.yaml
+# See kustomization.yaml for the configMapGenerator configuration.
+#
+# To edit the Envoy configuration, edit pgadmin-envoy.yaml instead.
+#
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:

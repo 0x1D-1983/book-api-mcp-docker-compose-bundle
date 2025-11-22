@@ -1,3 +1,11 @@
+# DEPRECATED: This file is no longer used.
+# The Envoy configuration has been moved to timescaledb-envoy.yaml for better editor support.
+# Kustomize's configMapGenerator now creates this ConfigMap from timescaledb-envoy.yaml
+# See kustomization.yaml for the configMapGenerator configuration.
+#
+# To edit the Envoy configuration, edit timescaledb-envoy.yaml instead.
+#
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:

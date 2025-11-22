@@ -4,11 +4,7 @@ kind: Kustomization
 namespace: default
 
 resources:
-  # Envoy configurations
-  - configmap-bookapi-envoy.yaml
-  - configmap-bookapi-mcp-server-envoy.yaml
-  - configmap-pgadmin-envoy.yaml
-  - configmap-timescaledb-envoy.yaml
+  # Envoy configurations are now generated from standalone YAML files via configMapGenerator
   
   # Deployments with Envoy sidecars
   - bookapi-deployment.yaml
@@ -30,12 +26,33 @@ resources:
 generatorOptions:
   disableNameSuffixHash: true
 
-# Generate ConfigMap from envoy-edge.yaml file
-# This allows editing envoy-edge.yaml with proper syntax highlighting
+# Generate ConfigMaps from standalone Envoy YAML files
+# This allows editing Envoy configs with proper syntax highlighting
 configMapGenerator:
+  # Edge Envoy configuration
   - name: envoy-conf
     files:
       - envoy.yaml=envoy-edge.yaml
+    namespace: default
+  # BookAPI Envoy sidecar configuration
+  - name: bookapi-envoy-config
+    files:
+      - envoy.yaml=bookapi-envoy.yaml
+    namespace: default
+  # BookAPI MCP Server Envoy sidecar configuration
+  - name: bookapi-mcp-server-envoy-config
+    files:
+      - envoy.yaml=bookapi-mcp-server-envoy.yaml
+    namespace: default
+  # pgAdmin Envoy sidecar configuration
+  - name: pgadmin-envoy-config
+    files:
+      - envoy.yaml=pgadmin-envoy.yaml
+    namespace: default
+  # TimescaleDB Envoy sidecar configuration
+  - name: timescaledb-envoy-config
+    files:
+      - envoy.yaml=timescaledb-envoy.yaml
     namespace: default
 
 secretGenerator:

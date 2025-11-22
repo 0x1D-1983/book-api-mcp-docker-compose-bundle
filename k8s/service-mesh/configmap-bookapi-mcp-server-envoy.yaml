@@ -1,3 +1,11 @@
+# DEPRECATED: This file is no longer used.
+# The Envoy configuration has been moved to bookapi-mcp-server-envoy.yaml for better editor support.
+# Kustomize's configMapGenerator now creates this ConfigMap from bookapi-mcp-server-envoy.yaml
+# See kustomization.yaml for the configMapGenerator configuration.
+#
+# To edit the Envoy configuration, edit bookapi-mcp-server-envoy.yaml instead.
+#
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
