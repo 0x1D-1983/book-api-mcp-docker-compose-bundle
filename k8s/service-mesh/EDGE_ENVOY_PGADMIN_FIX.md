@@ -1,8 +1,8 @@
-# Edge Envoy to pgAdmin mTLS Connection Failure
+# Edge Envoy to pgAdmin Connection Issues
 
 ## Problem
 
-When accessing `https://127.0.0.1/pgadmin/login?next=/` through the edge Envoy, you get the error:
+When accessing `https://<edge-ip>:8443/pgadmin` through the edge Envoy, you may see errors like:
 
 ```
 upstream connect error or disconnect/reset before headers. 
@@ -10,9 +10,24 @@ reset reason: remote connection failure,
 transport failure reason: TLS_error:|268435581:SSL routines:OPENSSL_internal:CERTIFICATE_VERIFY_FAILED
 ```
 
+**Note:** This error can be misleading - it may not actually be an SSL/certificate issue!
+
 ## Root Cause
 
-The `pgadmin-mtls-cert` secret contains a **different CA certificate** than the one used to sign the actual certificates. This causes the edge Envoy to fail when verifying the pgadmin certificate during the mTLS handshake.
+The SSL error is often a **symptom, not the root cause**. The actual issue is typically:
+
+### pgAdmin Subdirectory Hosting Misconfiguration
+
+When pgAdmin is hosted under a subdirectory (`/pgadmin`) but not properly configured:
+
+1. **pgAdmin generates incorrect redirects**: Without proper subdirectory configuration, pgAdmin redirects to `/` instead of `/pgadmin`
+2. **Edge Envoy routes to wrong service**: The edge Envoy's default route (`/`) sends these redirects to `bookapi-mcp-server` instead of pgAdmin
+3. **Service mesh blocks unauthorized connections**: pgAdmin's Envoy sidecar tries to connect to `bookapi-mcp-server`, but this connection is not allowed in the service mesh
+4. **SSL error appears**: The connection failure manifests as an SSL error, but the real issue is the misrouting
+
+### Certificate Issues (Less Common)
+
+In some cases, the `pgadmin-mtls-cert` secret may contain a **different CA certificate** than the one used to sign the actual certificates. This causes the edge Envoy to fail when verifying the pgadmin certificate during the mTLS handshake.
 
 ### Certificate Chain
 
@@ -24,7 +39,42 @@ When the edge Envoy tries to verify pgadmin's certificate, it uses the CA from `
 
 ## Solution
 
-Update all secrets to use the **same CA certificate** that was used to sign all the service certificates.
+### Fix 1: Configure pgAdmin Subdirectory Hosting (Most Common)
+
+The primary fix is to properly configure pgAdmin for subdirectory hosting in the edge Envoy:
+
+**In `envoy-edge-configmap.yaml`, the pgAdmin route must:**
+1. Strip the `/pgadmin` prefix when forwarding: `prefix_rewrite: "/"`
+2. Add the `X-Script-Name` header: `X-Script-Name: /pgadmin` (tells pgAdmin its base path)
+3. Add the `X-Scheme` header: `X-Scheme: https` (tells pgAdmin to generate HTTPS URLs)
+
+Example configuration:
+```yaml
+- match:
+    prefix: "/pgadmin"
+  route:
+    cluster: pgadmin
+    prefix_rewrite: "/"
+    request_headers_to_add:
+      - header:
+          key: X-Script-Name
+          value: /pgadmin
+      - header:
+          key: X-Scheme
+          value: https
+```
+
+This matches the NGINX reverse proxy configuration for pgAdmin subdirectory hosting.
+
+**Why this fixes it:**
+- pgAdmin now knows it's under `/pgadmin` and generates correct URLs
+- Redirects go to `/pgadmin/login` instead of `/login`
+- Edge Envoy correctly routes these requests back to pgAdmin
+- No misrouting to `bookapi-mcp-server`, so no SSL errors
+
+### Fix 2: Update Certificate Secrets (If Certificate Issue)
+
+If the issue persists after fixing subdirectory hosting, update all secrets to use the **same CA certificate** that was used to sign all the service certificates.
 
 ### Quick Fix (Automated)
 

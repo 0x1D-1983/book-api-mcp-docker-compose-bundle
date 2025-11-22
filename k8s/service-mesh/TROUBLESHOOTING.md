@@ -25,7 +25,15 @@
 
 **Symptom:** `upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure reason: TLS_error:|268435581:SSL routines:OPENSSL_internal:CERTIFICATE_VERIFY_FAILED`
 
+**Important:** This error can be misleading! It may not be an SSL/certificate issue at all. Check for routing/configuration issues first, especially for services hosted under subdirectories (like pgAdmin).
+
 **Possible Causes:**
+
+0. **Misrouting due to subdirectory hosting (Common for pgAdmin):**
+   - Service generates redirects to wrong path (e.g., `/` instead of `/subdirectory`)
+   - Edge Envoy routes to wrong backend service (default route)
+   - Service mesh blocks unauthorized service-to-service connection
+   - **Solution:** Configure proper subdirectory hosting with `X-Script-Name` header and `prefix_rewrite`
 
 1. **Client certificate not presented:**
    - Edge Envoy must have `tls_certificates` configured in `UpstreamTlsContext`
