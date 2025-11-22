@@ -46,12 +46,26 @@ data:
                   - "*"
                   routes:
                   # Route pgAdmin requests
+                  # Configured for subdirectory hosting as per pgAdmin reverse proxy docs
                   - match:
                       prefix: "/pgadmin"
                     route:
                       cluster: pgadmin
+                      # Strip /pgadmin prefix when forwarding to backend
                       prefix_rewrite: "/"
                       timeout: 300s
+                    # Add headers required by pgAdmin for subdirectory hosting
+                    request_headers_to_add:
+                      - header:
+                          key: X-Script-Name
+                          value: /pgadmin
+                      - header:
+                          key: X-Scheme
+                          value: https
+                      # Host header is preserved by default, but we can explicitly set it
+                      # - header:
+                      #     key: Host
+                      #     value: "%REQ(:authority)%"
                   # Default route to bookapi-mcp-server
                   - match:
                       prefix: "/"
@@ -146,6 +160,13 @@ data:
                   filename: /etc/ssl/envoy/ca.crt
                 # Removed match_typed_subject_alt_names - relying on CA validation only
                 # This avoids SPKI mismatch errors while still ensuring certificates are signed by trusted CA
+    overload_manager:
+      refresh_interval: 0.25s
+      resource_monitors:
+        - name: envoy.resource_monitors.global_downstream_max_connections
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.resource_monitors.downstream_connections.v3.DownstreamConnectionsConfig
+            max_active_downstream_connections: 50000
     layered_runtime:
       layers:
         - name: static_layer_0
